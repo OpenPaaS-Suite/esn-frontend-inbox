@@ -3,8 +3,9 @@ server {
   index index.html;
   root /usr/share/nginx/html;
 
-  location /inbox {
+  location /${PREFIX} {
     alias /usr/share/nginx/html/;
+    try_files $uri /index.html;
   }
 
   include /etc/nginx/extra-conf.d/*.conf;
