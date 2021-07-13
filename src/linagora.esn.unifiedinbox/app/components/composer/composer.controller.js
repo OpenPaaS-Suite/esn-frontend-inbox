@@ -7,7 +7,7 @@ require('../../services/request-receipts/request-receipts-service.js');
 require('../../services/attachment-upload/inbox-attachment-upload.service.js');
 require('../../services/draft/draft.js');
 require('../../services/attachment-provider-registry/attachment-provider-registry.service.js');
-
+require('../../services/composer-status/composer-status-service.js');
 angular.module('linagora.esn.unifiedinbox')
 
   .controller('inboxComposerController', function(
@@ -16,9 +16,11 @@ angular.module('linagora.esn.unifiedinbox')
     $rootScope,
     notificationFactory,
     emailSendingService,
+    inboxComposerCloseWindowService,
     inboxRequestReceiptsService,
     esnAttachmentsSelectorService,
     emailBodyService,
+    inboxComposerStatus,
     Offline,
     inboxAttachmentUploadService,
     waitUntilMessageIsComplete,
@@ -27,6 +29,7 @@ angular.module('linagora.esn.unifiedinbox')
     inboxAttachmentProviderRegistry,
     inboxEmailComposingHookService,
     DRAFT_SAVING_DEBOUNCE_DELAY,
+    INBOX_COMPOSER_STATUS,
     INBOX_ATTACHMENT_TYPE_JMAP,
     INBOX_EVENTS
   ) {
@@ -75,6 +78,7 @@ angular.module('linagora.esn.unifiedinbox')
         onAttachmentsUpdate: _setMessageAttachments,
         uploadAttachments: inboxAttachmentUploadService.uploadAttachments
       });
+      inboxComposerStatus.updateStatus(INBOX_COMPOSER_STATUS.OPENING);
 
       self.unregisterDraftListener = $rootScope.$on(INBOX_EVENTS.CLOSE_COMPOSER_WARNING, warnSaveDraft);
     }
@@ -134,6 +138,7 @@ angular.module('linagora.esn.unifiedinbox')
         })
         .finally(() => {
           self.saving = false;
+          inboxComposerStatus.updateStatus(INBOX_COMPOSER_STATUS.DISCARDING);
 
           return self.saving;
         });
